@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IBoard } from "../../types";
+import { IBoard, IList, ITask } from "../../types";
 
 type TboardsState = {
 	modalActive: boolean,
@@ -13,6 +13,17 @@ type TaddBoardAction = {
 type TdeleteListAction = {
 	boardId: string;
 	listId: string;
+}
+
+type TAddListAction = {
+	boardId: string;
+	list: IList;
+}
+
+type TAddTaskAction = {
+	boardId: string;
+	listId: string;
+	task: ITask;
 }
 
 const initialState: TboardsState = {
@@ -64,6 +75,31 @@ const boardSlice = createSlice({
 		addBoard: (state, { payload }: PayloadAction<TaddBoardAction>) => {
 			state.boardArray.push(payload.board);
 		},
+		addList: (state, {payload}: PayloadAction<TAddListAction>) => {
+			state.boardArray.map(board => 
+				board.boardId === payload.boardId
+				? {...board, lists: board.lists.push(payload.list)}
+				: board
+			)
+		},
+		addTask: (state, {payload}: PayloadAction<TAddTaskAction>) => {
+			state.boardArray.map(board => 
+				board.boardId === payload.boardId
+				? {
+					...board,
+					lists: board.lists.map(list => 
+						list.listId === payload.listId ?
+						{
+							...list,
+							tasks: list.tasks.push(payload.task)
+						}
+						: list
+					)
+				}
+				: board
+
+			)
+		},
 		deleteList: (state, {payload}: PayloadAction<TdeleteListAction>) => {
 			state.boardArray = state.boardArray.map(
 				board => 
@@ -84,5 +120,5 @@ const boardSlice = createSlice({
 	}
 })
 
-export const { addBoard, deleteList, setModalActive } = boardSlice.actions;
+export const { addBoard, deleteList, setModalActive, addList, addTask } = boardSlice.actions;
 export const boardsReducer = boardSlice.reducer;
